@@ -31,7 +31,7 @@ python main.py \
     --bits 2 \
     --group_size 128 \
     --quant_method PROJQ \
-    --rank 16 \
+    --rank 64 \
     --iteration 5 \
     --save_dir /path/to/quantized_model
 ```
