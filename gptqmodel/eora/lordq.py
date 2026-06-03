@@ -94,19 +94,23 @@ def lordq_compute_lora(
         original_backend = torch.backends.cuda.preferred_linalg_library()
         torch.backends.cuda.preferred_linalg_library(backend="magma")
 
-    Ux, Sx, Vx = torch.linalg.svd(raw_scaling_diag_matrix)
+    Sx, Ux = torch.linalg.eigh(raw_scaling_diag_matrix)
     Sx_pos = torch.clamp(Sx, min=1e-6)
     Y = Ux @ torch.diag(torch.sqrt(Sx_pos))
+    # Y = torch.linalg.cholesky(raw_scaling_diag_matrix)
     Y = Y.to(dtype=torch.float32)
-    Y_inv = torch.linalg.inv(Y)
-
+    # Y_inv = torch.linalg.inv(Y)
+    Y_inv = torch.diag(1.0 / torch.sqrt(Sx_pos)) @ Ux.T
+    Y_inv = Y_inv.to(dtype=torch.float32)
     RY = w_wq_delta @ Y
+    # RY = RY.to(dtype=torch.float32)
+  
     jitter = 1e-6 * torch.randn_like(RY)
-    truc_u, truc_s, truc_v = randomized_svd(A=RY + jitter, rank=rank, oversample=rank + 5, n_iter=2)
-
+    truc_u, truc_s, truc_v = randomized_svd(A=RY+jitter,rank=rank,oversample=rank+5,n_iter=2)
     truc_sigma = torch.diag(truc_s)
-    B = torch.matmul(truc_u, truc_sigma).to(dtype=dtype)
-    A = torch.matmul(truc_v, Y_inv).to(dtype=dtype)
+    sqrtS = torch.sqrt(truc_sigma)
+    B = truc_u @ sqrtS.to(dtype=dtype) # default to float16, check if we should save to float32
+    A = (sqrtS @ truc_v @ Y_inv).to(dtype=dtype) # default to float16, check if we should save to float32
 
     del Y, w_wq_delta, raw_scaling_diag_matrix
     del truc_s, truc_u, truc_v, truc_sigma
