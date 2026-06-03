@@ -1,7 +1,7 @@
 
 
 # ProjQ
-This repository contains code for the ICML 2026 paper [ProjQ: Project-and-Quantize for Adapter-Aware LLM Compression]().
+This repository contains code for the ICML 2026 paper [ProjQ: Project-and-Quantize for Adapter-Aware LLM Compression](https://arxiv.org/abs/2606.00494).
 
 ## Introduction
  We propose ProjQ, a novel framework for constraining quantization noise to the low-rank manifold via orthogonal subspace projection. We derive an efficient alternating algorithm that shapes the quantization noise into a low-rank structure, effectively offloading dominant error components to the subsequent adapter while minimizing the residual error in the orthogonal ”uncorrectable” subspace. Our algorithm consists of two phases: (1)Subspace-aware Quantization; and (2) Error Compensation with LoRA adapter initialization.
